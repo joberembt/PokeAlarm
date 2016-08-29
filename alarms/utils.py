@@ -14,6 +14,7 @@ from glob import glob
 from datetime import datetime, timedelta
 from math import radians, sin, cos, atan2, sqrt
 from s2sphere import LatLng
+#import pprint
 
 #Local imports
 from . import config
@@ -165,6 +166,7 @@ def get_dir(lat, lng):
 		return "NoLocationSet" #No location set
 	origin_point = LatLng.from_degrees(origin_point[0], origin_point[1])
 	latLon = LatLng.from_degrees(lat, lng)
+	#pprint.pprint(locals())
 	diff = latLon - origin_point
 	diff_lat = diff.lat().degrees
 	diff_lng = diff.lng().degrees

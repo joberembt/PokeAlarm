@@ -19,18 +19,21 @@ class Slack_Alarm(Alarm):
 		self.api_key = settings['api_key']
 		self.connect()
 		self.channel = settings.get('channel', "general")
-		self.title = settings.get('title', "A wild <pkmn> has appeared!")
+		self.title = settings.get('title', "<pkmn> has appeared")
 		self.url = settings.get('url', "<gmaps>")
-		self.body = settings.get('body', "Available until <24h_time> (<time_left>).")
+		self.body = settings.get('body', "<dist> <dir>, available until <24h_time> (<time_left>).")
 		self.username = settings.get('username', "<pkmn>")
 		self.map = get_static_map_url(settings.get('map', {}))
-		self.startup_message = settings.get('startup_message', "True")
+		self.emoji = settings.get('emoji', ":pokemon-<pkmn>:")
+		self.startup_message = settings.get('startup_message', "False")
 		log.info("Slack Alarm intialized.")
 		if parse_boolean(self.startup_message):
 			self.post_message(
 				channel=self.channel,
 				username='PokeAlarm',
-				text='PokeAlarm activated! We will alert this channel about pokemon.'
+				text='PokeAlarm activated! We will alert this channel about pokemon.',
+				icon_emoji=':pokemon-porygon:',
+				icon_url=None
 			)
 	
 	#Establish connection with Slack
@@ -66,12 +69,13 @@ class Slack_Alarm(Alarm):
 		return channel
 
 	#Post a message to channel
-	def post_message(self, channel, username, text, icon_url=None, map=None):
+	def post_message(self, channel, username, text, icon_emoji, icon_url=None, map=None):
 		args = {
 			'channel': self.get_channel(channel),
 			'username': username,
 			'text': text,
 			'icon_url': icon_url,
+			'icon_emoji': icon_emoji,
 		}
 		
 		if map is not None:
@@ -86,7 +90,8 @@ class Slack_Alarm(Alarm):
 		text = '<{}|{}> {}'.format(replace(self.url, pkinfo),  replace(self.title, pkinfo) , replace(self.body, pkinfo))
 		icon_url = 'https://raw.githubusercontent.com/kvangent/PokeAlarm/master/icons/{}.png'.format(pkinfo['id'])
 		map = self.get_map(pkinfo)
-		self.post_message(channel, username, text, icon_url, map)
+		emoji = replace(self.emoji, pkinfo)
+		self.post_message(channel, username, text, emoji, icon_url, map)
 
 	# Build a query for a static map of the pokemon location
 	def get_map(self, info):
